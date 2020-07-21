@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "95e26145-55ed-4538-9fb4-49f3f8d28682",
+		"name": "Spotify Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get new access token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2edad0f5-2772-406b-92a3-1bff7167a519",
+						"exec": [
+							"pm.response"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bde39d44-3e8e-456d-bd89-0dbd726fc131",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"access_token\", jsonData.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": {
+						"accessToken": "BQDDjbLCSadMidiGEoXnwBXzm9u2J5sAxcqiG2essLL0PWvdCUsLJrb5-HwSYngmdhkV6frhkNCHtX323FV3tK6oH30339VWQtnS4ywQ81DqEDuwaAMyZAQFhOD_--j37dZHj7NU0XF06IzgxoTc2ahrMCzdSW78IT8E193co_1BQNhCaqxnaNTWx3UAfoOPjJ7x4TWYy4QlKr_c_X0DkQ",
+						"tokenType": "Bearer",
+						"addTokenTo": "queryParams"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f6ae48ef-43af-4164-85a1-a7f477fddfa9",
+						"exec": [
+							"id = pm.environment.get(\"client_id\");\r",
+							"secrect = pm.environment.get(\"client_secret\");\r",
+							"string = id + \":\" + secrect\r",
+							"\r",
+							"pm.environment.set(\"base64Encod\", btoa(string));\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2c60137a-409e-4a09-beb0-99da280690a4",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic {{base64Encod}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": "https://accounts.spotify.com/api/token"
+			},
+			"response": []
+		},
+		{
+			"name": "User - Get Profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{access_token}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://api.spotify.com/v1/users/{{user_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Playlist - Get all",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{access_token}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.spotify.com/v1/users/{{user_id}}/playlists?limit=1",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"users",
+						"{{user_id}}",
+						"playlists"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Playlist - Create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{access_token}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"name\": \"novo teste apos o refresh de token\",\r\n\t\"description\": \"Esta playlist é para mostrar como criar uma nova playlist\",\r\n\t\"public\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://api.spotify.com/v1/users/{{user_id}}/playlists"
+			},
+			"response": []
+		},
+		{
+			"name": "Search",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.spotify.com/v1/search?type=artist&q=avalanche city",
+					"protocol": "https",
+					"host": [
+						"api",
+						"spotify",
+						"com"
+					],
+					"path": [
+						"v1",
+						"search"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "artist"
+						},
+						{
+							"key": "q",
+							"value": "avalanche city"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Playlist - Get One",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": "https://api.spotify.com/v1/playlists/{{playlist_id}}"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "4fbb931b-7ead-40eb-91cc-d3b4f8d721c1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "31f13e77-b758-4a91-ab6b-8798964cd221",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
